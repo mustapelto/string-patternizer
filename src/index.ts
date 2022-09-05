@@ -1,43 +1,71 @@
-enum CharType {
-    None = -1,
-    Number,
-    Letter,
-    Other
-}
+type CharType = 'number' | 'letter' | 'other';
 
 const isNumber = (value: string) => /\d/.test(value);
 const isLetter = (value: string) => /[A-Z]/i.test(value);
 const isOther = (value: string) => /[^0-9A-Z]/i.test(value);
 
-const getBlocks = (value: string) => {
+const getCharType = (char: string): CharType | undefined => {
+    if (char.length === 0 || char.length > 1)
+        return undefined;
+    if (isNumber(char))
+        return 'number';
+    if (isLetter(char))
+        return 'letter';
+    if (isOther(char))
+        return 'other';
+    return undefined;
+}
+
+const getCharTypes = (value: string) => {
     let result: string[] = [];
-    let buffer = '';
-    let lastType: CharType = CharType.None;
 
     for (let i = 0; i < value.length; i++) {
-        const current = value[i];
-        let currentType: CharType;
-        if (isNumber(current))
-            currentType = CharType.Number;
-        else if (isLetter(current))
-            currentType = CharType.Letter;
-        else if (isOther(current))
-            currentType = CharType.Other;
-        else
-            currentType = CharType.None;
+        const def = getCharType(value[i]);
 
-        if (lastType === currentType) {
-            buffer.concat(current);
-        } else {
-            result.push(buffer);
-            buffer = '';
-            lastType = currentType;
-        }
+        if (def)
+            result.push(def);
     }
 
     return result;
 }
 
-export const patternize = (value: string, pattern: string) => {
-    return getBlocks(pattern);
+export const patternize = (source: string, pattern: string) => {
+    const sourceTypes = getCharTypes(source);
+    const patternTypes = getCharTypes(pattern);
+
+    if (sourceTypes.length !== source.length) {
+        throw new Error('Invalid patternize input: source contains invalid characters!');
+    }
+    
+    if (patternTypes.length !== pattern.length) {
+        throw new Error('Invalid patternize input: pattern contains invalid characters!');
+    }
+
+    let sourceIndex = 0;
+    let patternIndex = 0;
+
+    let result = '';
+
+    while (sourceIndex < sourceTypes.length && patternIndex < patternTypes.length) {
+        const sourceType = sourceTypes[sourceIndex];
+        const patternType = patternTypes[patternIndex];
+        const sourceChar = source[sourceIndex];
+        const patternChar = pattern[patternIndex];
+
+        if (sourceType === patternType) {
+            // same type in source and pattern --> copy char and advance both indices
+            result += sourceChar;
+            sourceIndex++;
+            patternIndex++;
+        } else if (patternTypes[patternIndex] === 'other') {
+            // pattern contains "delimiter" char not in source --> copy pattern char and advance pattern index
+            result += patternChar;
+            patternIndex++;
+        } else {
+            // source doesn't match pattern --> jump over
+            sourceIndex++;
+        }
+    }
+
+    return result;
 }
