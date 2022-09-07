@@ -51,9 +51,9 @@ const getPatternCharType = (char: string): CharType => {
 
     switch (char) {
         case 'd': return CharType.Digit;
-        case 'x': return CharType.Letter;
         case 'a': return CharType.Lowercase;
         case 'A': return CharType.Uppercase;
+        case '_': return CharType.Letter;
         case '*': return CharType.Symbol;
         case '.': return CharType.Any;
         case '+': return CharType.Repeat;

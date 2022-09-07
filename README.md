@@ -34,12 +34,12 @@ Describes how the input should be formatted.
 
 Characters with special meaning:
 - d: any digit
-- x: any letter
 - a: any lowercase letter
 - A: any uppercase letter
+- _: any letter
 - *: any "other" (not digit or letter) character
 - .: any character
-- +: repeat previous 0-infinite times
+- +: repeat previous character type 0-infinite times
 - \: start of escape sequence
 
 Any other character will be interpreted as "required", i.e. will automatically be copied *as-is* into the result string, even if not present in the source string.

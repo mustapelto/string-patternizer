@@ -1,1 +1,1 @@
-export declare const patternize: (value: string, pattern: string) => string[];
+export declare const patternize: (pattern: string, source: string) => string;
