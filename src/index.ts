@@ -122,7 +122,7 @@ export const patternize = (pattern: string, source: string) => {
             const sourceType = getSourceCharType(sourceChar, patternType === CharType.Letter);
 
             if (patternType === CharType.Repeat) {
-                if (!prevPatternType) {
+                if (prevPatternType === undefined) {
                     throw new SyntaxError(`Invalid pattern: ${pattern}. "Repeat" ('+') not allowed at pattern start.`);
                 }
 
