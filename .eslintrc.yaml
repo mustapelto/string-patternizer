@@ -1,0 +1,50 @@
+root: true
+parser: "@typescript-eslint/parser"
+plugins:
+  - "@typescript-eslint"
+env:
+  es6: true
+  node: true
+  mocha: true
+extends:
+  - eslint:recommended
+  - plugin:@typescript-eslint/eslint-recommended
+  - plugin:@typescript-eslint/recommended
+parserOptions:
+  ecmaVersion: 2018
+  sourceType: module
+rules:
+  no-constant-binary-expression: error
+  no-constructor-return: error
+  no-duplicate-imports: error
+  no-self-compare: error
+  no-unreachable-loop: error
+  no-unused-private-class-members: error
+  no-use-before-define: error
+  class-methods-use-this: error
+  curly: error
+  eqeqeq: error
+  no-console: warn
+  no-continue: error
+  no-else-return:
+    - error
+    - allowElseIf: false
+  no-undefined: error
+  no-var: error
+  prefer-const: error
+  prefer-numeric-literals: error
+  prefer-spread: error
+  prefer-template: error
+  require-unicode-regexp: error
+  spaced-comment: error
+  linebreak-style:
+    - error
+    - windows
+  quotes:
+    - error
+    - single
+    - allowTemplateLiterals: true
+  keyword-spacing:
+    - error
+    - before: true
+  space-before-blocks: error

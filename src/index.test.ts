@@ -1,77 +1,89 @@
 import { patternize } from './index';
+import { expect } from 'chai';
 
-test('Empty inputs', () => {
-    expect(patternize('', '')).toBe('');
+describe('empty results', function() {
+    it('should return an empty string when pattern and source are empty', function() {
+        expect(patternize('', '')).to.equal('');
+    });
+
+    it('should return an empty string for any source when pattern is empty', function() {
+        expect(patternize('', 'asdf-+.123xoASDF')).to.equal('');
+    });
+
+    it('should return an empty string for any pattern not containing fixed characters when source is empty', function() {
+        expect(patternize('aaddA-.*da', '')).to.equal('');
+    });
 });
 
-test('Empty pattern', () => {
-    expect(patternize('', 'some-text.123')).toBe('');
+describe('single character tests', function() {
+    it('should return the source digits', function() {
+        const source = '012';
+        expect(patternize('ddd', source)).to.equal(source);
+    });
+
+    it('should return the source letters without changing case', function() {
+        const source = 'AbcD';
+        expect(patternize('____', source)).to.equal(source);
+    });
+
+    it('should return the source symbols', function() {
+        const source = '-+/';
+        expect(patternize('***', source)).to.equal(source);
+    });
+
+    it('should return any characters in the source', function() {
+        const source = 'a+2*D';
+        expect(patternize('.....', source)).to.equal(source);
+    });
+
+    it('should return the characters in the pattern', function() {
+        const pattern = 'g#X2';
+        expect(patternize(pattern, '')).to.equal(pattern);
+    });
+
+    it('should return the escaped characters in the pattern', function() {
+        expect(patternize('\\.\\*\\a', '')).to.equal('.*a');
+    });
 });
 
-test('Empty source', () => {
-    expect(patternize('aaa', '')).toBe('');
+describe('basic modification tests', function() {
+    it('should remove non-matching characters', function() {
+        expect(patternize('dddaaa', '12abc3d45ef6')).to.equal('123def');
+    });
+
+    it('should truncate the source to the pattern\'s length', function() {
+        expect(patternize('___', 'abcdef')).to.equal('abc');
+    });
+
+    it('should add missing fixed characters', function() {
+        expect(patternize('"___"\\+dd="___dd"', 'abc12abc12')).to.equal('"abc"+12="abc12"');
+    });
+
+    it('should change the source letters\' case to match the pattern', function() {
+        expect(patternize('AaaaAaaa', 'testCASE')).to.equal('TestCase');
+    });
+
+    it('should output repeating character types', function() {
+        expect(patternize('d+\\.a+', '1234abcd')).to.equal('1234.abcd');
+    });
 });
 
-test('Digit', () => {
-    expect(patternize('ddd', '012')).toBe('012');
+describe('invalid pattern tests', function() {
+    it('should throw if the pattern starts with a \'+\' (repetition)', function() {
+        expect(() => { patternize('+aaa', '123asd') }).to.throw();
+    });
 });
 
-test('Letter', () => {
-    expect(patternize('___', 'abc')).toBe('abc');
-});
+describe('specific pattern tests', function() {
+    it('should convert the source string to US phone number format', function() {
+        expect(patternize('(ddd) ddd dddd', '5551234567')).to.equal('(555) 123 4567');
+    });
 
-test('Symbol', () => {
-    expect(patternize('***', '-+/')).toBe('-+/');
-});
+    it('should convert the source string to IPv4 format', function() {
+        expect(patternize('ddd\\.ddd\\.ddd\\.ddd', '123123123123')).to.equal('123.123.123.123');
+    });
 
-test('Any', () => {
-    expect(patternize('...', 'a*2')).toBe('a*2');
-});
-
-test('Fixed', () => {
-    expect(patternize('g#2', '')).toBe('g#2');
-});
-
-test('Escape sequence', () => {
-    expect(patternize('\\.\\*\\a', '')).toBe('.*a');
-});
-
-test('Remove non-matching', () => {
-    expect(patternize('ddd', '12abc3')).toBe('123');
-});
-
-test('Truncate', () => {
-    expect(patternize('___', 'abcde')).toBe('abc');
-});
-
-test('Add fixed characters', () => {
-    expect(patternize('"___"\\+dd="___dd"', 'abc12abc12')).toBe('"abc"+12="abc12"');
-});
-
-test('Case change', () => {
-    expect(patternize('AaaaAaaa', 'testCASE')).toBe('TestCase');
-});
-
-test('Repetition', () => {
-    expect(patternize('d+\\.a+', '1234abcd')).toBe('1234.abcd');
-});
-
-test('Repetition at start of pattern', () => {
-    expect(() => patternize('+aaa', '123asd')).toThrow();
-});
-
-test('Digit', () => {
-    expect(patternize('d', '0')).toBe('0');
-});
-
-test('US phone number', () => {
-    expect(patternize('(ddd) ddd dddd', '5551234567')).toBe('(555) 123 4567');
-});
-
-test('IPv4', () => {
-    expect(patternize('ddd\\.ddd\\.ddd\\.ddd', '123123123123')).toBe('123.123.123.123');
-});
-
-test('Full name', () => {
-    expect(patternize('Aa+ Aa+', 'firstname lastname')).toBe('Firstname Lastname');
+    it('should convert any two-part string into a "Firstname Lastname" form', () => {
+        expect(patternize('Aa+ Aa+', 'lowercase fullname')).to.equal('Lowercase Fullname');
+    });
 });

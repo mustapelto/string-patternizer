@@ -14,6 +14,7 @@
 */
 
 enum CharType {
+    Invalid,
     Digit,
     Letter,
     Lowercase,
@@ -25,61 +26,72 @@ enum CharType {
     Specific
 }
 
-const isDigit = (value: string) => /\d/.test(value);
-const isLetter = (value: string) => /[A-Z]/i.test(value);
-const isLowercaseLetter = (value: string) => /[a-z]/.test(value);
-const isUppercaseLetter = (value: string) => /[A-Z]/.test(value);
+const isDigit = (value: string) => /\d/u.test(value);
+const isLetter = (value: string) => /[A-Z]/iu.test(value);
+const isLowercaseLetter = (value: string) => /[a-z]/u.test(value);
+const isUppercaseLetter = (value: string) => /[A-Z]/u.test(value);
 
 const getSourceCharType = (char: string, ignoreLetterCase?: boolean): CharType => {
-    if (char.length !== 1)
-        throw new SyntaxError(`Syntax error: getSourceCharType(${char}). Argument must be a string of length 1.`);
-
-    if (isDigit(char))
+    if (isDigit(char)) {
         return CharType.Digit;
-    if (ignoreLetterCase && isLetter(char))
+    }
+    if (ignoreLetterCase && isLetter(char)) {
         return CharType.Letter;
-    if (isLowercaseLetter(char))
+    }
+    if (isLowercaseLetter(char)) {
         return CharType.Lowercase;
-    if (isUppercaseLetter(char))
+    }
+    if (isUppercaseLetter(char)) {
         return CharType.Uppercase;
+    }
+
     return CharType.Symbol;
-}
+};
 
 const getPatternCharType = (char: string): CharType => {
-    if (char.length !== 1)
-        throw new SyntaxError(`Syntax error: getPatternCharType(${char}). Argument must be a string of length 1.`);
+    if (!char) {
+        return CharType.Invalid;
+    }
 
     switch (char) {
-        case 'd': return CharType.Digit;
-        case 'a': return CharType.Lowercase;
-        case 'A': return CharType.Uppercase;
-        case '_': return CharType.Letter;
-        case '*': return CharType.Symbol;
-        case '.': return CharType.Any;
-        case '+': return CharType.Repeat;
-        case '\\': return CharType.Escape;
-        default: return CharType.Specific;
+        case 'd':
+            return CharType.Digit;
+        case 'a':
+            return CharType.Lowercase;
+        case 'A':
+            return CharType.Uppercase;
+        case '_':
+            return CharType.Letter;
+        case '*':
+            return CharType.Symbol;
+        case '.':
+            return CharType.Any;
+        case '+':
+            return CharType.Repeat;
+        case '\\':
+            return CharType.Escape;
+        default:
+            return CharType.Specific;
     }
-}
+};
 
 const isLetterType = (charType?: CharType) => charType && ((charType === CharType.Letter) || (charType === CharType.Lowercase) || (charType === CharType.Uppercase));
 
 const fitsPattern = (sourceType: CharType, patternType: CharType) =>
-    (patternType === CharType.Any) || 
+    (patternType === CharType.Any) ||
     (patternType === sourceType) ||
     (isLetterType(patternType) && isLetterType(sourceType));
 
 const transformCaseIfRequired = (char: string, patternType: CharType) => {
-    if (char.length !== 1)
-        throw new Error(`Syntax error: transformCaseIfRequired(${char}, ${patternType}). First argument must be a string of length 1.`);
-    
-    if (patternType === CharType.Lowercase)
+    if (patternType === CharType.Lowercase) {
         return char.toLocaleLowerCase();
-    else if (patternType === CharType.Uppercase)
+    }
+    if (patternType === CharType.Uppercase) {
         return char.toLocaleUpperCase();
-    else
-        return char;
-}
+    }
+
+    return char;
+};
 
 export const patternize = (pattern: string, source: string) => {
     let sourceIndex = 0;
@@ -87,18 +99,15 @@ export const patternize = (pattern: string, source: string) => {
 
     let result = '';
 
-    let patternType: CharType;
-    let prevPatternType: CharType | undefined = undefined;
-
     while (patternIndex < pattern.length) {
-        const sourceChar = source[sourceIndex] || undefined;
+        const sourceChar = source[sourceIndex];
         const patternChar = pattern[patternIndex];
-        
-        if (prevPatternType === CharType.Escape) {
-            patternType = CharType.Specific;
-        } else {
-            patternType = getPatternCharType(patternChar);
-        }
+        const prevPatternChar = pattern[patternIndex - 1];
+
+        const prevPatternType = getPatternCharType(prevPatternChar);
+        const patternType: CharType = (prevPatternType === CharType.Escape) ?
+            CharType.Specific :
+            getPatternCharType(patternChar);
 
         if (patternType === CharType.Escape) {
             // Start of escape sequence --> advance pattern index to read whole sequence
@@ -116,13 +125,14 @@ export const patternize = (pattern: string, source: string) => {
             patternIndex++;
             result += patternChar;
         } else {
-            if (!sourceChar)
-                break; // Source ended before pattern, pattern contains remaining non-specific characters --> incomplete input, abort processing
-        
+            if (!sourceChar) {
+                break;
+            } // Source ended before pattern, pattern contains remaining non-specific characters --> incomplete input, abort processing
+
             const sourceType = getSourceCharType(sourceChar, patternType === CharType.Letter);
 
             if (patternType === CharType.Repeat) {
-                if (prevPatternType === undefined) {
+                if (prevPatternType === CharType.Invalid) {
                     throw new SyntaxError(`Invalid pattern: ${pattern}. "Repeat" ('+') not allowed at pattern start.`);
                 }
 
@@ -130,12 +140,12 @@ export const patternize = (pattern: string, source: string) => {
                     // current char still fits repeat pattern:
                     // - copy char and transform case if necessary
                     // - advance source index
-                    // - skip prevPatternType update
+                    // - don't advance pattern index
                     result += transformCaseIfRequired(sourceChar, prevPatternType);
                     sourceIndex++;
-                    continue;
                 } else {
                     // current char no longer fits repeat pattern:
+                    // - don't advance source index (has to be tested against next pattern char
                     // - advance pattern index
                     patternIndex++;
                 }
@@ -151,8 +161,6 @@ export const patternize = (pattern: string, source: string) => {
                 sourceIndex++;
             }
         }
-
-        prevPatternType = patternType;
     }
 
     return result;
