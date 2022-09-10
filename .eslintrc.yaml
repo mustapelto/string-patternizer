@@ -37,9 +37,6 @@ rules:
   prefer-template: error
   require-unicode-regexp: error
   spaced-comment: error
-  linebreak-style:
-    - error
-    - windows
   quotes:
     - error
     - single
