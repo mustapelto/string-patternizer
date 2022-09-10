@@ -1,5 +1,5 @@
 [![codecov](https://codecov.io/gh/mustapelto/string-patternizer/branch/main/graph/badge.svg?token=TGKZZDARZZ)](https://codecov.io/gh/mustapelto/string-patternizer)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/mustapelto/string-patternizer/build)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/mustapelto/string-patternizer/Build%20Repository)
 
 # string-patternizer
 
