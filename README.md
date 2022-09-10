@@ -1,10 +1,13 @@
+[![codecov](https://codecov.io/gh/mustapelto/string-patternizer/branch/main/graph/badge.svg?token=TGKZZDARZZ)](https://codecov.io/gh/mustapelto/string-patternizer)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/mustapelto/string-patternizer/build)
+
 # string-patternizer
 
 ## Overview
 
 ---
 
-Inspired by (but not copied from) [https://github.com/arthurdenner/format-string-by-pattern](format-string-by-pattern). Converts any string to match a given pattern. Currently supports
+Inspired by (but not copied from) [format-string-by-pattern](https://github.com/arthurdenner/format-string-by-pattern). Converts any string to match a given pattern. Currently supports
 letters (case-sensitive or -insensitive), digits, symbols, "any character" and specific/required characters.
 
 ## Install
