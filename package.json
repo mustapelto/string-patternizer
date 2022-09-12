@@ -2,8 +2,13 @@
   "name": "string-patternizer",
   "version": "1.0.0",
   "description": "Convert strings to match a pattern",
-  "main": "dist/index.js",
-  "types": "dist/index.d.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": "./dist/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "test": "ts-mocha src/*.test.ts",
