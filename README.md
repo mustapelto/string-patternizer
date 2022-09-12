@@ -36,17 +36,25 @@ In other words, no function is provided to e.g. limit an IP address string to nu
 Describes how the input should be formatted.
 
 Characters with special meaning:
-- d: any digit
-- a: any lowercase letter
-- A: any uppercase letter
-- _: any letter
-- *: any "other" (not digit or letter) character
-- .: any character
-- +: repeat previous character type 0-infinite times
-- \: start of escape sequence
+- `d` = any digit
+- `a` = any lowercase letter
+- `A` = any uppercase letter
+- `_` = any letter
+- `*` = any "other" (not digit or letter) character
+- `.` = any character
+- `+` = repeat previous character type 0-infinite times
+- `\` = start of escape sequence
 
-Any other character will be interpreted as "required", i.e. will automatically be copied *as-is* into the result string, even if not present in the source string.
-The special characters above need to be escaped to be used as "required".
+Any other character will be interpreted as "required", i.e. will automatically be copied *as-is* into the result string,
+even if not present in the source string. The special characters above need to be escaped with a `\ ` to be used as
+"required".
+
+**Note:** as JavaScript interprets a single backslash in string literals as an escape sign, you have to
+*escape the backslash* in string literals:
+
+&#9989; `patternize('aa\\.dd', 'ab.12')`  
+&#10060; `patternize('aa\.dd', 'ab.12')`
+
 
 **source**: `string`
 
@@ -57,17 +65,17 @@ The input value to be formatted.
     import patternize from 'string-patternizer'
 
     // US phone number (including country code)
-    patternize('5551234567', '\+1 (ddd) ddd dddd');
+    patternize('\\+1 (ddd) ddd dddd', '5551234567');
     // '+1 (555) 123 4567'
 
     // Full name
-    patternize('firstname lastname', 'Aa+ Aa+');
+    patternize('Aa+ Aa+', 'firstname lastname');
     // 'Firstname Lastname'
 
     // IP address (format only, no validation i.e. numbers over 255 are possible)
-    patternize('111222333444', 'ddd\.ddd\.ddd\.ddd');
+    patternize('ddd\\.ddd\\.ddd\\.ddd', '111222333444');
     // '111.222.333.444'
 
     // Currency
-    patternize('1234', 'd+\.dd€');
+    patternize('d+\\.dd€', '1234');
     // '12.34€'
